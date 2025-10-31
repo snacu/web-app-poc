@@ -1,4 +1,11 @@
 import db from '$lib/db.js'
+import { env } from '$env/dynamic/public'
+
+let baseUrl = 'http://localhost:5173'
+const definedBaseUrl = !!env.PUBLIC_BASE_URL
+if (definedBaseUrl) {
+  baseUrl = `https://${env.PUBLIC_BASE_URL.replace('https://', '')}`
+}
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
@@ -15,5 +22,6 @@ export async function load() {
 
   return {
     entries,
+    baseUrl,
   }
 }

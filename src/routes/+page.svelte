@@ -98,7 +98,7 @@
         <button
           onclick={() =>
             copyToClipboard(
-              'curl -X POST http://localhost:5173/data/example -H "Content-Type: application/json" -d \'{"message": "Hello World"}\'',
+              `curl -X POST ${data.baseUrl}/data/req-1 -H "Content-Type: application/json" -d '{"message": "Hello World"}'`,
             )}
           class="absolute top-2 right-2 flex items-center gap-1 rounded bg-gray-700 px-2 py-1 text-xs text-white hover:bg-gray-600"
           title="Copy command"
@@ -120,7 +120,7 @@
           Copy
         </button>
         <code class="block rounded bg-gray-800 p-4 text-left text-sm text-white">
-          curl -X POST http://localhost:5173/data/example \<br />
+          curl -X POST {data.baseUrl}/data/req-1 \<br />
           &nbsp;&nbsp;-H "Content-Type: application/json" \<br />
           &nbsp;&nbsp;-d '{'{'}"message": "Hello World"{'}'}'
         </code>
