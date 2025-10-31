@@ -31,7 +31,7 @@
         <code class="block rounded bg-gray-800 p-4 text-left text-sm text-white">
           curl -X POST http://localhost:5173/data/example \<br />
           &nbsp;&nbsp;-H "Content-Type: application/json" \<br />
-          &nbsp;&nbsp;-d '{'{'}'"message": "Hello World"'{'}'}'
+          &nbsp;&nbsp;-d '{'{'}"message": "Hello World"{'}'}'
         </code>
       </div>
     </div>
