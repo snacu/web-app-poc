@@ -98,7 +98,7 @@
         <button
           onclick={() =>
             copyToClipboard(
-              `curl -X POST ${data.baseUrl}/data/req-1 -H "Content-Type: application/json" -d '{"message": "Hello World"}'`,
+              `http POST ${data.baseUrl}/data/rq-1 Content-Type:application/json X-Custom-Header:"custom-header-val" message="example request"`,
             )}
           class="absolute top-2 right-2 flex items-center gap-1 rounded bg-gray-700 px-2 py-1 text-xs text-white hover:bg-gray-600"
           title="Copy command"
@@ -119,11 +119,14 @@
           </svg>
           Copy
         </button>
-        <code class="block rounded bg-gray-800 p-4 text-left text-sm text-white">
-          curl -X POST {data.baseUrl}/data/req-1 \<br />
-          &nbsp;&nbsp;-H "Content-Type: application/json" \<br />
-          &nbsp;&nbsp;-d '{'{'}"message": "Hello World"{'}'}'
-        </code>
+        <pre class="block overflow-auto rounded bg-gray-800 p-4 text-left text-sm text-white">
+          <code class="language-bash">
+http POST {data.baseUrl}/data/rq-1 \
+  Content-Type:application/json \
+  X-Custom-Header:"custom-header-val" \
+  message="example request"
+          </code>
+        </pre>
       </div>
     </div>
   {:else}

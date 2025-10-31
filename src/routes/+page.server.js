@@ -1,9 +1,9 @@
 import db from '$lib/db.js'
 
 let baseUrl = 'http://localhost:5173'
-const definedBaseUrl = !!import.meta.env.PUBLIC_BASE_URL
+const definedBaseUrl = !!process.env.PUBLIC_BASE_URL
 if (definedBaseUrl) {
-  baseUrl = `https://${import.meta.env.PUBLIC_BASE_URL.replace('https://', '')}`
+  baseUrl = `https://${process.env.PUBLIC_BASE_URL.replace('https://', '')}`
 }
 
 /** @type {import('./$types').PageServerLoad} */
