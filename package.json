@@ -42,5 +42,9 @@
     "vite": "^7.1.10",
     "vitest": "^3.2.4",
     "vitest-browser-svelte": "^1.1.0"
+  },
+  "dependencies": {
+    "lowdb": "^7.0.1",
+    "svelte-highlight": "^7.9.0"
   }
 }
