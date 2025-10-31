@@ -47,3 +47,19 @@ export async function GET({ params }) {
 
   return json(db.data.data[id])
 }
+
+/** @type {import('./$types').RequestHandler} */
+export async function DELETE({ params }) {
+  const { id } = params
+
+  await db.read()
+
+  if (!db.data.data[id]) {
+    return json({ error: 'Not found' }, { status: 404 })
+  }
+
+  delete db.data.data[id]
+  await db.write()
+
+  return json({ success: true, id })
+}
