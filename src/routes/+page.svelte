@@ -2,9 +2,11 @@
   import Highlight from 'svelte-highlight'
   import json from 'svelte-highlight/languages/json'
   import 'svelte-highlight/styles/oceanicnext.css'
+  import { invalidateAll } from '$app/navigation'
 
   let { data } = $props()
   let expandedIds = $state(new Set())
+  let isRefreshing = $state(false)
 
   /**
    * @param {string} id
@@ -17,10 +19,52 @@
     }
     expandedIds = new Set(expandedIds) // Trigger reactivity
   }
+
+  /**
+   * @param {string} text
+   */
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text)
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  async function refresh() {
+    isRefreshing = true
+    await invalidateAll()
+    isRefreshing = false
+  }
 </script>
 
 <div class="container mx-auto p-8">
-  <h1 class="mb-8 text-4xl font-bold">Requests</h1>
+  <div class="mb-8 flex items-baseline gap-3">
+    <h1 class="text-4xl font-bold">Requests</h1>
+    <button
+      onclick={refresh}
+      disabled={isRefreshing}
+      class="flex items-center gap-1 rounded px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+      title="Refresh entries"
+    >
+      <svg
+        class="h-4 w-4 {isRefreshing ? 'animate-spin' : ''}"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        ></path>
+      </svg>
+      Refresh
+    </button>
+  </div>
 
   {#if data.entries.length === 0}
     <div class="rounded-lg border border-gray-300 bg-gray-50 p-8 text-center">
@@ -85,18 +129,60 @@
           {#if expandedIds.has(entry.id)}
             <div class="border-t border-gray-200 bg-gray-50 p-4">
               <div class="mb-4">
-                <h3 class="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                  Body
-                </h3>
+                <div class="mb-2 flex items-center justify-between">
+                  <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Body</h3>
+                  <button
+                    onclick={() => copyToClipboard(JSON.stringify(entry.body, null, 2))}
+                    class="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                    title="Copy body"
+                  >
+                    <svg
+                      class="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                    Copy
+                  </button>
+                </div>
                 <div class="overflow-hidden rounded-md">
                   <Highlight language={json} code={JSON.stringify(entry.body, null, 2)} />
                 </div>
               </div>
 
               <div>
-                <h3 class="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                  Headers
-                </h3>
+                <div class="mb-2 flex items-center justify-between">
+                  <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Headers</h3>
+                  <button
+                    onclick={() => copyToClipboard(JSON.stringify(entry.headers, null, 2))}
+                    class="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                    title="Copy headers"
+                  >
+                    <svg
+                      class="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                    Copy
+                  </button>
+                </div>
                 <div class="overflow-hidden rounded-md">
                   <Highlight language={json} code={JSON.stringify(entry.headers, null, 2)} />
                 </div>
