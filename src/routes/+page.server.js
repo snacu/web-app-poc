@@ -1,10 +1,9 @@
 import db from '$lib/db.js'
-import { env } from '$env/dynamic/public'
 
 let baseUrl = 'http://localhost:5173'
-const definedBaseUrl = !!env.PUBLIC_BASE_URL
+const definedBaseUrl = !!import.meta.env.PUBLIC_BASE_URL
 if (definedBaseUrl) {
-  baseUrl = `https://${env.PUBLIC_BASE_URL.replace('https://', '')}`
+  baseUrl = `https://${import.meta.env.PUBLIC_BASE_URL.replace('https://', '')}`
 }
 
 /** @type {import('./$types').PageServerLoad} */
