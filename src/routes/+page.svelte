@@ -12,12 +12,11 @@
   let entriesWithOffset = $derived.by(() => {
     if (data.entries.length === 0) return []
 
-    const firstTimestamp = new Date(data.entries[data.entries.length - 1].timestamp).getTime()
-
     return data.entries.map((entry) => {
       const entryTime = new Date(entry.timestamp).getTime()
-      const sinceFist = ((entryTime - firstTimestamp) / 1000).toFixed(3)
-      return { ...entry, sinceFist }
+      const firstSeen = entry.since_first_seen
+      const sinceFirstSeen = ((entryTime - firstSeen) / 1000).toFixed(3)
+      return { ...entry, sinceFirstSeen }
     })
   })
 
@@ -167,8 +166,8 @@ http POST {data.baseUrl}/data/rq-1 \
                   {new URL(entry.url).pathname}
                 </span>
               {/if}
-              <span class="font-mono text-xs text-purple-500">
-                +{entry.sinceFist}s
+              <span class="ml-4 font-mono text-xs text-green-500">
+                +{entry.since_first_seen}s
               </span>
               <span class="ml-auto font-mono text-xs text-gray-400">
                 {(() => {
