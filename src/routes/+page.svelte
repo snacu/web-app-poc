@@ -8,6 +8,19 @@
   let expandedIds = $state(new Set())
   let isRefreshing = $state(false)
 
+  // Calculate time since first entry
+  let entriesWithOffset = $derived.by(() => {
+    if (data.entries.length === 0) return []
+
+    const firstTimestamp = new Date(data.entries[data.entries.length - 1].timestamp).getTime()
+
+    return data.entries.map((entry) => {
+      const entryTime = new Date(entry.timestamp).getTime()
+      const sinceFist = ((entryTime - firstTimestamp) / 1000).toFixed(3)
+      return { ...entry, sinceFist }
+    })
+  })
+
   /**
    * @param {string} id
    */
@@ -131,33 +144,45 @@ http POST {data.baseUrl}/data/rq-1 \
     </div>
   {:else}
     <div class="mb-4 text-gray-600">
-      Showing {data.entries.length}
-      {data.entries.length === 1 ? 'entry' : 'entries'}
+      Showing {entriesWithOffset.length}
+      {entriesWithOffset.length === 1 ? 'entry' : 'entries'}
     </div>
 
     <div class="space-y-2">
-      {#each data.entries as entry}
+      {#each entriesWithOffset as entry}
         <div
           class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all"
         >
           <div class="flex items-center justify-between p-4 hover:bg-gray-50">
             <button
-              class="flex flex-1 items-center gap-4 text-left"
+              class="flex flex-1 items-center gap-3 text-left"
               onclick={() => toggleEntry(entry.id)}
             >
               <span class="text-lg font-semibold text-blue-600">{entry.id}</span>
-              <span class="text-sm text-gray-500"
-                >{new Date(entry.timestamp).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  fractionalSecondDigits: 3,
-                  hour12: false,
-                })}</span
-              >
+              {#if entry.method && entry.url}
+                <span class="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                  {entry.method}
+                </span>
+                <span class="text-sm text-gray-600">
+                  {new URL(entry.url).pathname}
+                </span>
+              {/if}
+              <span class="font-mono text-xs text-purple-500">
+                +{entry.sinceFist}s
+              </span>
+              <span class="ml-auto font-mono text-xs text-gray-400">
+                {(() => {
+                  const d = new Date(entry.timestamp)
+                  const year = d.getFullYear()
+                  const month = String(d.getMonth() + 1).padStart(2, '0')
+                  const day = String(d.getDate()).padStart(2, '0')
+                  const hour = String(d.getHours()).padStart(2, '0')
+                  const minute = String(d.getMinutes()).padStart(2, '0')
+                  const second = String(d.getSeconds()).padStart(2, '0')
+                  const ms = String(d.getMilliseconds()).padStart(3, '0')
+                  return `${year}/${month}/${day} ${hour}:${minute}.${second}.${ms}`
+                })()}
+              </span>
             </button>
             <div class="flex items-center gap-2">
               <button

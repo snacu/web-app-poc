@@ -15,17 +15,27 @@ export async function POST({ params, request }) {
   }
 
   // Get headers as object
+  /** @type {Record<string, string>} */
   const headers = {}
   request.headers.forEach((value, key) => {
     headers[key] = value
   })
 
-  // Store in database
-  db.data.data[id] = {
+
+
+  const payload = {
     body,
     headers,
+    method: request.method,
+    url: request.url,
     timestamp: new Date().toISOString(),
   }
+
+  const firstSeen = Number(headers['x-first-seen'])
+  if (firstSeen) {
+    payload.since_first_seen = Date.now() - firstSeen
+  }
+  db.data.data[id] = payload
   await db.write()
 
   return json({
