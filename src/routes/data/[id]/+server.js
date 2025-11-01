@@ -33,8 +33,10 @@ export async function POST({ params, request }) {
 
   const firstSeen = Number(headers['x-first-seen'])
   if (firstSeen) {
-    payload.since_first_seen = Date.now() - firstSeen
+    const elapsed = Date.now() - firstSeen
+    payload.since_first_seen = (elapsed / 1000).toFixed(3) + 's'
   }
+
   db.data.data[id] = payload
   await db.write()
 

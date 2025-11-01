@@ -13,10 +13,7 @@
     if (data.entries.length === 0) return []
 
     return data.entries.map((entry) => {
-      const entryTime = new Date(entry.timestamp).getTime()
-      const firstSeen = entry.since_first_seen
-      const sinceFirstSeen = ((entryTime - firstSeen) / 1000).toFixed(3)
-      return { ...entry, sinceFirstSeen }
+      return { ...entry }
     })
   })
 
@@ -166,8 +163,13 @@ http POST {data.baseUrl}/data/rq-1 \
                   {new URL(entry.url).pathname}
                 </span>
               {/if}
-              <span class="ml-4 font-mono text-xs text-green-500">
-                +{entry.since_first_seen}s
+              <span
+                class="ml-4 font-mono text-xs {entry.since_first_seen &&
+                parseFloat(entry.since_first_seen) > data.threshold
+                  ? 'rounded bg-red-600 px-2 py-1 text-white'
+                  : 'text-green-500'}"
+              >
+                {entry.since_first_seen ? '+' + entry.since_first_seen : 'n/a'}
               </span>
               <span class="ml-auto font-mono text-xs text-gray-400">
                 {(() => {

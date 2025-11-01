@@ -6,6 +6,9 @@ if (definedBaseUrl) {
   baseUrl = `https://${process.env.BASE_URL.replace('https://', '')}`
 }
 
+const threshold = Number(process.env.LIMIT_THRESHOLD || 500)
+const MAX_ENTRIES = Number(process.env.MAX_ENTRIES || 100)
+
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
   await db.read()
@@ -17,10 +20,11 @@ export async function load() {
       ...data,
     }))
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 30) // Get latest 30
+    .slice(0, MAX_ENTRIES)
 
   return {
     entries,
     baseUrl,
+    threshold,
   }
 }
