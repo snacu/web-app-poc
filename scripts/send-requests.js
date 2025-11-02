@@ -22,7 +22,7 @@ for (let i = 0; i < numberOfRequests; i++) {
   let batch = getRandomd(4)
   let id = `rq-${batch}-${i}`
   let url = `${URL}/data/${id}`
-  let body = `info="script https://github.com/snacu/poc-web-app/scripts/send-requests.js"`
+  let body = `info="script https://github.com/snacu/web-app-poc/blob/main/scripts/send-requests.js"`
   let cmd = `http --ignore-stdin POST ${url} Content-Type:application/json ${body}`
   execSync(cmd)
 }

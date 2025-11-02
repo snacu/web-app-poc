@@ -7,6 +7,7 @@
   let { data } = $props()
   let expandedIds = $state(new Set())
   let isRefreshing = $state(false)
+  let threshold = $state(data.threshold)
 
   // Calculate time since first entry
   let entriesWithOffset = $derived.by(() => {
@@ -139,9 +140,21 @@ http POST {data.baseUrl}/data/rq-1 \
       </div>
     </div>
   {:else}
-    <div class="mb-4 text-gray-600">
-      Showing {entriesWithOffset.length}
-      {entriesWithOffset.length === 1 ? 'entry' : 'entries'}
+    <div class="mb-4 flex items-center justify-between text-gray-600">
+      <div>
+        Showing {entriesWithOffset.length}
+        {entriesWithOffset.length === 1 ? 'entry' : 'entries'}
+      </div>
+      <div class="text-sm">
+        Threshold millis:
+        <input
+          type="number"
+          bind:value={threshold}
+          step="0.1"
+          min="0"
+          class="ml-1 w-16 rounded border border-gray-300 px-2 py-0.5 font-mono text-sm font-semibold text-gray-800 focus:border-blue-500 focus:outline-none"
+        />
+      </div>
     </div>
 
     <div class="space-y-2">
@@ -165,7 +178,7 @@ http POST {data.baseUrl}/data/rq-1 \
               {/if}
               <span
                 class="ml-4 font-mono text-xs {entry.since_first_seen &&
-                parseFloat(entry.since_first_seen) * 1000 > data.threshold
+                (parseFloat(entry.since_first_seen) * 1000) > threshold
                   ? 'rounded bg-red-600 px-2 py-1 text-white'
                   : 'text-green-500'}"
               >
