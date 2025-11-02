@@ -30,6 +30,31 @@
     return ((throttledCount / entriesWithOffset.length) * 100).toFixed(2)
   })
 
+  // Calculate latency data points for chart
+  let latencyChartData = $derived.by(() => {
+    if (entriesWithOffset.length === 0) return []
+
+    const latencies = entriesWithOffset
+      .filter((entry) => entry.since_first_seen)
+      .map((entry) => parseFloat(entry.since_first_seen) * 1000)
+      .sort((a, b) => a - b)
+
+    if (latencies.length === 0) return []
+
+    const minLatency = Math.floor(latencies[0])
+    const maxLatency = Math.ceil(latencies[latencies.length - 1]) + 100 // Add 100ms to show 0% throttled
+    const step = Math.max(1, Math.ceil((maxLatency - minLatency) / 20))
+
+    const dataPoints = []
+    for (let lat = minLatency; lat <= maxLatency; lat += step) {
+      const throttledCount = latencies.filter((l) => l > lat).length
+      const percentage = (throttledCount / latencies.length) * 100
+      dataPoints.push({ latency: lat, percentage })
+    }
+
+    return dataPoints
+  })
+
   /**
    * @param {string} id
    */
@@ -353,22 +378,23 @@ http POST {data.baseUrl}/data/rq-1 \
     <!-- Visualize Tab -->
     <div class="flex flex-col items-center justify-center py-12">
       <div class="mb-8">
-        <div class="text-sm text-gray-600">
+        <div class="text-lg text-gray-700">
           Threshold millis:
           <input
             type="number"
             bind:value={threshold}
             step="10"
             min="10"
-            class="ml-1 w-18 rounded border border-gray-300 px-2 py-0.5 font-mono text-sm font-semibold text-gray-800 focus:border-blue-500 focus:outline-none"
+            class="ml-2 w-28 rounded border border-gray-300 px-3 py-2 font-mono text-lg font-semibold text-gray-800 focus:border-blue-500 focus:outline-none"
           />
         </div>
       </div>
 
       <div class="text-center">
         <h2 class="mb-6 text-2xl font-bold">Request Distribution</h2>
-        <div class="mb-4 text-4xl font-bold">{entriesWithOffset.length}</div>
-        <div class="mb-8 text-gray-600">Total Requests</div>
+        <div class="mb-8 text-2xl text-gray-700">
+          <span class="text-4xl font-bold">{entriesWithOffset.length}</span> Total Requests
+        </div>
 
         {#if entriesWithOffset.length > 0}
           {@const throttledPct = Number(throttledPercentage)}
@@ -411,6 +437,135 @@ http POST {data.baseUrl}/data/rq-1 \
           <div class="text-gray-500">No data to visualize</div>
         {/if}
       </div>
+
+      <!-- Latency vs Throttled Chart -->
+      {#if latencyChartData.length > 0}
+        {@const minLat = latencyChartData[0].latency}
+        {@const maxLat = latencyChartData[latencyChartData.length - 1].latency}
+        {@const latRange = maxLat - minLat}
+        {@const points = latencyChartData
+          .map((d) => {
+            const x = 60 + ((d.latency - minLat) / latRange) * 700
+            const y = 350 - d.percentage * 2.5
+            return `${x},${y}`
+          })
+          .join(' ')}
+        {@const thresholdX = 60 + ((threshold - minLat) / latRange) * 700}
+
+        <div class="mt-16 text-center">
+          <h2 class="mb-6 text-2xl font-bold">Latency vs Throttled %</h2>
+          <div class="mx-auto max-w-4xl rounded-lg border border-gray-200 bg-white p-6">
+            <svg width="800" height="400" viewBox="0 0 800 400" class="mx-auto">
+              <!-- Grid lines -->
+              {#each [0, 25, 50, 75, 100] as y}
+                <line
+                  x1="60"
+                  y1={350 - y * 2.5}
+                  x2="760"
+                  y2={350 - y * 2.5}
+                  stroke="#e5e7eb"
+                  stroke-width="1"
+                />
+                <text x="45" y={355 - y * 2.5} font-size="12" text-anchor="end" fill="#6b7280">
+                  {y}%
+                </text>
+              {/each}
+
+              <!-- Axes -->
+              <line x1="60" y1="350" x2="760" y2="350" stroke="#374151" stroke-width="2" />
+              <line x1="60" y1="350" x2="60" y2="100" stroke="#374151" stroke-width="2" />
+
+              <!-- X-axis labels -->
+              {#each [0, 0.25, 0.5, 0.75, 1] as fraction}
+                {@const latValue = Math.round(minLat + latRange * fraction)}
+                {@const xPos = 60 + 700 * fraction}
+                <text x={xPos} y="370" font-size="12" text-anchor="middle" fill="#6b7280">
+                  {latValue}ms
+                </text>
+              {/each}
+
+              <!-- Data line -->
+              <polyline
+                {points}
+                fill="none"
+                stroke="#3b82f6"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+
+              <!-- Current threshold marker -->
+              {#if threshold >= minLat && threshold <= maxLat}
+                {@const throttledY = 350 - Number(throttledPercentage) * 2.5}
+                <!-- Vertical line (threshold) -->
+                <line
+                  x1={thresholdX}
+                  y1="100"
+                  x2={thresholdX}
+                  y2="350"
+                  stroke="#ef4444"
+                  stroke-width="2"
+                  stroke-dasharray="5,5"
+                />
+                <text
+                  x={thresholdX}
+                  y="90"
+                  font-size="12"
+                  text-anchor="middle"
+                  fill="#ef4444"
+                  font-weight="bold"
+                >
+                  Current: {threshold}ms
+                </text>
+
+                <!-- Horizontal line (throttled %) -->
+                <line
+                  x1="60"
+                  y1={throttledY}
+                  x2="760"
+                  y2={throttledY}
+                  stroke="#ef4444"
+                  stroke-width="2"
+                  stroke-dasharray="5,5"
+                />
+                <text
+                  x="750"
+                  y={throttledY - 5}
+                  font-size="12"
+                  text-anchor="end"
+                  fill="#ef4444"
+                  font-weight="bold"
+                >
+                  {throttledPercentage}%
+                </text>
+              {/if}
+
+              <!-- Axis labels -->
+              <text
+                x="400"
+                y="395"
+                font-size="14"
+                text-anchor="middle"
+                fill="#374151"
+                font-weight="bold"
+              >
+                Latency (milliseconds)
+              </text>
+              <text
+                x="-225"
+                y="20"
+                font-size="14"
+                text-anchor="middle"
+                fill="#374151"
+                font-weight="bold"
+                transform="rotate(-90)"
+              >
+                Throttled %
+              </text>
+            </svg>
+          </div>
+        </div>
+      {/if}
     </div>
   {/if}
 </div>
