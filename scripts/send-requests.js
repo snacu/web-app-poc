@@ -18,8 +18,8 @@ function getRandomd(N) {
   return word
 }
 
+let batch = getRandomd(3)
 for (let i = 0; i < numberOfRequests; i++) {
-  let batch = getRandomd(3)
   const paddingLength = numberOfRequests.toString().length
   const paddedIndex = i.toString().padStart(paddingLength, '0')
   let id = `rq-${batch}-${paddedIndex}`
