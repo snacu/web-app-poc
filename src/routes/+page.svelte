@@ -18,6 +18,17 @@
     })
   })
 
+  // Calculate throttled percentage
+  let throttledPercentage = $derived.by(() => {
+    if (entriesWithOffset.length === 0) return 0
+
+    const throttledCount = entriesWithOffset.filter(
+      (entry) => entry.since_first_seen && parseFloat(entry.since_first_seen) * 1000 > threshold,
+    ).length
+
+    return ((throttledCount / entriesWithOffset.length) * 100).toFixed(2)
+  })
+
   /**
    * @param {string} id
    */
@@ -69,30 +80,35 @@
 </script>
 
 <div class="container mx-auto p-8">
-  <div class="mb-8 flex items-baseline gap-3">
-    <h1 class="text-4xl font-bold">Requests</h1>
-    <button
-      onclick={refresh}
-      disabled={isRefreshing}
-      class="flex items-center gap-1 rounded px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
-      title="Refresh entries"
-    >
-      <svg
-        class="h-4 w-4 {isRefreshing ? 'animate-spin' : ''}"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
+  <div class="mb-8 flex items-baseline justify-between">
+    <div class="flex items-baseline gap-3">
+      <h1 class="text-4xl font-bold">Requests</h1>
+      <button
+        onclick={refresh}
+        disabled={isRefreshing}
+        class="flex items-center gap-1 rounded px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+        title="Refresh entries"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-        ></path>
-      </svg>
-      Refresh
-    </button>
+        <svg
+          class="h-4 w-4 {isRefreshing ? 'animate-spin' : ''}"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          ></path>
+        </svg>
+        Refresh
+      </button>
+    </div>
+    <span class="rounded bg-orange-100 px-2 py-1 text-sm font-semibold text-orange-700">
+      Throttled: <b>{throttledPercentage}</b>
+    </span>
   </div>
 
   {#if data.entries.length === 0}
@@ -137,8 +153,8 @@ http POST {data.baseUrl}/data/rq-1 \
     </div>
   {:else}
     <div class="mb-4 flex items-center justify-between text-gray-600">
-      <div>
-        Showing {entriesWithOffset.length}
+      <div title="The most recent entries">
+        Most recent: <b>{entriesWithOffset.length}</b>
         {entriesWithOffset.length === 1 ? 'entry' : 'entries'}
       </div>
       <div class="text-sm">
@@ -146,9 +162,9 @@ http POST {data.baseUrl}/data/rq-1 \
         <input
           type="number"
           bind:value={threshold}
-          step="0.1"
-          min="0"
-          class="ml-1 w-16 rounded border border-gray-300 px-2 py-0.5 font-mono text-sm font-semibold text-gray-800 focus:border-blue-500 focus:outline-none"
+          step="10"
+          min="10"
+          class="ml-1 w-18 rounded border border-gray-300 px-2 py-0.5 font-mono text-sm font-semibold text-gray-800 focus:border-blue-500 focus:outline-none"
         />
       </div>
     </div>
@@ -174,7 +190,7 @@ http POST {data.baseUrl}/data/rq-1 \
               {/if}
               <span
                 class="ml-4 font-mono text-xs {entry.since_first_seen &&
-                (parseFloat(entry.since_first_seen) * 1000) > threshold
+                parseFloat(entry.since_first_seen) * 1000 > threshold
                   ? 'rounded bg-red-600 px-2 py-1 text-white'
                   : 'text-green-500'}"
               >

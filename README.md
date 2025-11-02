@@ -1,22 +1,10 @@
-# sv
-
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
+# Simulator app to visualize what requests will be throttled
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The app is built on NodeJS / Svelte 5 / SvelteKit / Tailwind CSS
+
+Once you've created/cloned the project and installed dependencies with `npm install` (or `pnpm install`), start a development server:
 
 ```sh
 npm run dev
@@ -35,4 +23,16 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Simulate (or send) requests
+
+For the live app use:
+
+```sh
+ ./scripts/send-rq $WEB_APP_URL $NO_OF_REQUESTS
+```
+
+For localhost:
+
+```sh
+node scripts/send-requests-local.js $NO_OF_REQUESTS
+```
