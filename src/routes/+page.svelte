@@ -52,10 +52,6 @@
    * @param {string} id
    */
   async function deleteEntry(id) {
-    if (!confirm(`Delete entry "${id}"?`)) {
-      return
-    }
-
     try {
       const response = await fetch(`/data/${id}`, {
         method: 'DELETE',

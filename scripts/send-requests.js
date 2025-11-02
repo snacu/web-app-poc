@@ -19,10 +19,13 @@ function getRandomd(N) {
 }
 
 for (let i = 0; i < numberOfRequests; i++) {
-  let batch = getRandomd(4)
-  let id = `rq-${batch}-${i}`
+  let batch = getRandomd(3)
+  const paddingLength = numberOfRequests.toString().length
+  const paddedIndex = i.toString().padStart(paddingLength, '0')
+  let id = `rq-${batch}-${paddedIndex}`
+  log(id)
   let url = `${URL}/data/${id}`
   let body = `info="script https://github.com/snacu/web-app-poc/blob/main/scripts/send-requests.js"`
   let cmd = `http --ignore-stdin POST ${url} Content-Type:application/json ${body}`
-  execSync(cmd)
+  // execSync(cmd)
 }
