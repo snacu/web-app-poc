@@ -1,6 +1,11 @@
 # Generate requests 
 
-In both the cases of a local dev deployment and a web app publicly available it's useful to have scripts that generate requests 
+In both the cases of a local dev deployment and a web app publicly available it's useful to have scripts that generate requests. 
+
+The scripts are opionated and make use of [HTTPie](https://httpie.io) (more consice than  `curl`)
+```sh
+brew install httpie
+```
 
 ## Local
 
