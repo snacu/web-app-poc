@@ -21,8 +21,6 @@ export async function POST({ params, request }) {
     headers[key] = value
   })
 
-
-
   const payload = {
     body,
     headers,
@@ -34,7 +32,7 @@ export async function POST({ params, request }) {
   const firstSeen = Number(headers['x-first-seen'])
   if (firstSeen) {
     const elapsed = Date.now() - firstSeen
-    payload.since_first_seen = (elapsed / 1000).toFixed(3) + 's'
+    payload.since_first_seen = (elapsed / 1000).toFixed(3)
   }
 
   db.data.data[id] = payload

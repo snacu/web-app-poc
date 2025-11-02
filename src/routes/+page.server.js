@@ -6,7 +6,7 @@ if (definedBaseUrl) {
   baseUrl = `https://${process.env.BASE_URL.replace('https://', '')}`
 }
 
-const threshold = Number(process.env.LIMIT_THRESHOLD || 500)
+const threshold = Number(process.env.LIMIT_THRESHOLD || 300)
 const MAX_ENTRIES = Number(process.env.MAX_ENTRIES || 100)
 
 /** @type {import('./$types').PageServerLoad} */

@@ -165,11 +165,11 @@ http POST {data.baseUrl}/data/rq-1 \
               {/if}
               <span
                 class="ml-4 font-mono text-xs {entry.since_first_seen &&
-                parseFloat(entry.since_first_seen) > data.threshold
+                parseFloat(entry.since_first_seen) * 1000 > data.threshold
                   ? 'rounded bg-red-600 px-2 py-1 text-white'
                   : 'text-green-500'}"
               >
-                {entry.since_first_seen ? '+' + entry.since_first_seen : 'n/a'}
+                {entry.since_first_seen ? '+' + entry.since_first_seen + 's' : 'n/a'}
               </span>
               <span class="ml-auto font-mono text-xs text-gray-400">
                 {(() => {
